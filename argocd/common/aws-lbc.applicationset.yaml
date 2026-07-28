@@ -44,9 +44,10 @@ spec:
     spec:
       project: default
       source:
-        repoURL: https://gitlab.com/rahulreddy-001/grubzo-ops.git
+      
+        repoURL: https://github.com/GrubzoFood/grubzo-k8s.git
         targetRevision: release/1.0
-        path: k8s/argocd/common/manifests
+        path: argocd/common/manifests
         directory:
           include: "lbc.serviceaccount.yaml"
       destination:

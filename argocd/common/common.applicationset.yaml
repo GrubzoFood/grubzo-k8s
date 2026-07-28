@@ -19,7 +19,7 @@ spec:
         path: charts/common
         helm:
           parameters:
-            - name: aws-secret-manager-region
+            - name: awsSecretManagerRegion
               value: ap-south-2
       destination:
         namespace: gateway
