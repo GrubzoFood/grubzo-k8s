@@ -1,0 +1,13 @@
+{{- if eq .Values.configMap.values.STORAGE_TYPE "local" }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Values.persistentVolumeClaim.name }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: "gp2"
+  resources:
+    requests:
+      storage: {{ .Values.persistentVolumeClaim.size }}
+{{- end}}

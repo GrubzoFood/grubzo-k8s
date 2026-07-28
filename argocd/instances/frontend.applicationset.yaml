@@ -1,0 +1,59 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: frontend-application
+  namespace: argocd
+
+spec:
+  goTemplate: true
+  goTemplateOptions:
+    - missingkey=error
+
+  # explore plugin based generator
+  generators:
+    - list:
+        elements:
+          # - env: qa
+          #   instance: mars
+          #   namespace: ins1
+
+          # - env: qa
+          #   instance: mars
+          #   namespace: ins2
+
+          - env: prod
+            instance: mars
+            namespace: common
+
+  template:
+    metadata:
+      name: "{{.env}}.{{.instance}}.{{.namespace}}.frontend"
+      labels:
+        instance: "{{.instance}}"
+        environment: "{{.env}}"
+    spec:
+      project: default
+
+      sources:
+        - repoURL: https://github.com/GrubzoFood/grubzo-k8s.git
+          targetRevision: release/1.0
+          path: charts/instance/frontend
+          helm:
+            valueFiles:
+              - "$values/argocd/instances/{{.env}}/{{.instance}}/{{.namespace}}/values.frontend.yaml"
+
+        - repoURL: https://github.com/GrubzoFood/grubzo-k8s.git
+          targetRevision: release/1.0
+          ref: values
+
+      destination:
+        name: "{{.instance}}"
+        namespace: "{{.namespace}}"
+
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+
+        syncOptions:
+          - CreateNamespace=true

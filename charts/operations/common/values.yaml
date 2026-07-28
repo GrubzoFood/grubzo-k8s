@@ -1,0 +1,31 @@
+httpRoute:
+  name: argocd-https-redirect
+  parentRefs:
+    - name: default
+      namespace: gateway
+      sectionName: http-gateway
+
+  hostnames:
+    - argocd.ops.grubzo.food
+
+  rules:
+    - filters:
+        - type: RequestRedirect
+          requestRedirect:
+            scheme: https
+            statusCode: 301
+
+httpsRoute:
+  name: argocd-https
+  parentRefs:
+    - name: default
+      namespace: gateway
+      sectionName: https-gateway
+
+  hostnames:
+    - argocd.ops.grubzo.food
+
+  rules:
+    - backendRefs:
+        - name: argocd-server
+          port: 443

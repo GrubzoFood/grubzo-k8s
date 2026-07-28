@@ -1,0 +1,55 @@
+appName: frontend
+namespace: frontend
+replicaCount: 1
+
+image:
+  repository: rohana001/grubzo-frontend
+  pullPolicy: IfNotPresent
+  tag: "v0.1.1"
+
+service:
+  name: frontend-svc
+  type: ClusterIP
+
+httpRoute:
+  name: frontend-http-redirect
+  parentRefs:
+    - name: default
+      namespace: gateway
+      sectionName: http-gateway
+  rules:
+    - filters:
+      - type: RequestRedirect
+        requestRedirect:
+          scheme: https
+          statusCode: 301
+  hostnames:
+    - "*.grubzo.food"
+
+httpsRoute:
+  name: frontend-httpsroute
+  parentRefs:
+    - name: default
+      namespace: gateway
+      sectionName: https-gateway
+  rules:
+    - backendRefs:
+        - name: frontend-svc
+          port: 443
+  hostnames:
+    - "*.grubzo.food"
+
+resources:
+  limits:
+    cpu: 100m
+    memory: 128Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80

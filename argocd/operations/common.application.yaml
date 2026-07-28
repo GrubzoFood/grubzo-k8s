@@ -1,0 +1,27 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: ops-applications
+  namespace: argocd
+spec:
+  project: default
+  sources:
+    - repoURL: https://github.com/GrubzoFood/grubzo-k8s.git
+      targetRevision: release/1.0
+      path: charts/operations/common
+      helm:
+        valueFiles:
+          - "$values/argocd/operations/values/common.values.yaml"
+
+    - repoURL: https://github.com/GrubzoFood/grubzo-k8s.git
+      targetRevision: release/1.0
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

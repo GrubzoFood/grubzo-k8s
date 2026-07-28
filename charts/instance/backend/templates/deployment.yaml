@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.appName }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+
+  selector:
+    matchLabels:
+      app: {{ .Values.appName }}
+
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.appName }}
+
+    spec:
+      serviceAccountName: {{ .Values.serviceAccount.name }}
+      containers:
+        - name: {{ .Values.appName }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+
+          ports:
+            - containerPort: 80
+
+          resources:
+{{ toYaml .Values.resources | nindent 12 }}
+
+          envFrom:
+            - configMapRef:
+                name: {{ .Values.configMap.name }}
+            - secretRef:
+                name: {{ .Values.aws.secretManager.targetKubeSecret }}
+
+{{- if eq .Values.configMap.values.STORAGE_TYPE "local" }}
+          volumeMounts:
+            - name: storage
+              mountPath: {{ .Values.configMap.values.STORAGE_LOCAL_DIR | quote }}
+{{- end }}
+
+{{- if eq .Values.configMap.values.STORAGE_TYPE "local" }}
+      volumes:
+        - name: storage
+          persistentVolumeClaim:
+            claimName: {{ .Values.persistentVolumeClaim.name }}
+{{- end }}

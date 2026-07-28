@@ -1,0 +1,28 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ .Values.httpRoute.name }}
+spec:
+  parentRefs:
+{{- toYaml .Values.httpRoute.parentRefs | nindent 4 }}
+
+  hostnames:
+{{- toYaml .Values.httpRoute.hostnames | nindent 4 }}
+
+  rules:
+{{- toYaml .Values.httpRoute.rules | nindent 4 }}
+
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ .Values.httpsRoute.name }}
+spec:
+  parentRefs:
+{{- toYaml .Values.httpsRoute.parentRefs | nindent 4 }}
+
+  hostnames:
+{{- toYaml .Values.httpsRoute.hostnames | nindent 4 }}
+
+  rules:
+{{- toYaml .Values.httpsRoute.rules | nindent 4 }}

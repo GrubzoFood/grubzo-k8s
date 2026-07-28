@@ -1,0 +1,8 @@
+image:
+  tag: "v0.1.5"
+
+instance: mars
+configMap:
+  values:
+    INSTANCE: mars
+    ENV: prod

@@ -1,0 +1,154 @@
+instance: "default"
+appName: backend
+replicaCount: 3
+
+serviceAccount:
+  name: "grubzo-backend"
+
+persistentVolumeClaim:
+  name: "grubzo-pvc-tmp-storage"
+  size: "1Gi"
+
+image:
+  repository: rohana001/grubzo-backend
+  pullPolicy: IfNotPresent
+  tag: "v0.1.1"
+
+service:
+  name: backend-svc
+  type: ClusterIP
+
+httpRoute:
+  name: backend-http-redirect
+  parentRefs:
+    - name: default
+      namespace: gateway
+      sectionName: http-gateway
+  hostnames:
+    - "auth.grubzo.food"
+    - "*.grubzo.food"
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /platform
+        - path:
+            type: PathPrefix
+            value: /auth
+        - path:
+            type: PathPrefix
+            value: /api
+      filters:
+        - type: RequestRedirect
+          requestRedirect:
+            scheme: https
+            statusCode: 301
+
+httpsRoute:
+  name: backend-https
+  parentRefs:
+    - name: default
+      namespace: gateway
+      sectionName: https-gateway
+  hostnames:
+    - "auth.grubzo.food"
+    - "*.grubzo.food"
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /platform
+        - path:
+            type: PathPrefix
+            value: /auth
+        - path:
+            type: PathPrefix
+            value: /api
+      backendRefs:
+        - name: backend-svc
+          port: 80
+
+aws:
+  secretManager:
+    secretName: "{{ .Values.instance }}/backend-secrets"
+    secretNameManual: "{{ .Values.instance }}/backend-secrets-manual"
+    targetKubeSecret: application-external-secrets
+    refreshInterval: 10m
+
+resources:
+  limits:
+    cpu: 100m
+    memory: 128Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
+
+secrets:
+  extractedExternalSecretsName: extracted-external-secrets
+configMap:
+  name: config
+  values:
+    # App
+    APP_NAME: Grubzo
+    APP_PORT: "80"
+    APP_DOMAIN: grubzo.food
+
+    # Redis
+    DATABASE_REDIS_DB: "0"
+    DATABASE_REDIS_TLS_ENABLED: "true"
+    
+    # PostgreSQL
+    DATABASE_TYPE: pg
+    DATABASE_SQL_DB: grubzo
+    DATABASE_SQL_MAX_OPEN: "0"
+    DATABASE_SQL_MAX_IDLE: "0"
+    DATABASE_SQL_LIFETIME: "0"
+
+    # SQLite
+    DATABASE_SQLITE_PATH: /tmp/grubzo.db
+    DATABASE_SQLITE_MAX_OPEN: "1"
+    DATABASE_SQLITE_MAX_IDLE: "1"
+    DATABASE_SQLITE_LIFETIME: "3600"
+
+    # Storage
+    STORAGE_TYPE: s3
+
+    # Local Storage
+    STORAGE_LOCAL_DIR: /tmp/grubzo/
+
+    # s3
+    STORAGE_S3_FORCE_PATH_STYLE: "false"
+
+    # MCP
+    MCP_PORT: "0"
+    MCP_BASE_PATH: ""
+    MCP_SYSTEM_PROMPT: ""
+
+    # MCP LLM
+    MCP_LLM_PROVIDER: gemini
+    MCP_LLM_MODEL: gemini-3.1-flash-lite-preview
+    MCP_LLM_BASE_URL: https://generativelanguage.googleapis.com/v1beta
+    MCP_LLM_TEMPERATURE: "0.7"
+    MCP_LLM_MAX_TOKENS: "1000"
+    MCP_LLM_TIMEOUT_SECONDS: "30"
+
+    # Observability
+    TEMPO_HOST: localhost:4318
+
+    # OAuth callbacks
+    OAUTH_GOOGLE_CALLBACK_URL: http://auth.grubzo.food/auth/v1/oauth/login/google/callback
+    OAUTH_GITHUB_CALLBACK_URL: http://auth.grubzo.food/auth/v1/oauth/login/github/callback
+
+    # Runtime
+    ENV: prod
+    INSTANCE: default
+    SESSION_STORAGE: redis
+    PPROF: "true"
+    SHUTDOWN_TIMEOUT: "5"

@@ -1,0 +1,112 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: aws-lbc-crds
+  namespace: argocd
+spec:
+  generators:
+    - clusters: {}
+  template:
+    metadata:
+      name: "aws-lbc-crds-{{name}}"
+      annotations:
+        argocd.argoproj.io/sync-wave: "-10"
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/aws/eks-charts.git
+        targetRevision: master
+        path: stable/aws-load-balancer-controller/crds
+      destination:
+        namespace: kube-system
+        server: "{{server}}"
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: false
+        syncOptions:
+          - ServerSideApply=true
+
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: aws-lbc-sa
+  namespace: argocd
+spec:
+  generators:
+    - clusters: {}
+  template:
+    metadata:
+      name: "aws-lbc-sa-{{name}}"
+      annotations:
+        argocd.argoproj.io/sync-wave: "-9"
+    spec:
+      project: default
+      source:
+        repoURL: https://gitlab.com/rahulreddy-001/grubzo-ops.git
+        targetRevision: release/1.0
+        path: k8s/argocd/common/manifests
+        directory:
+          include: "lbc.serviceaccount.yaml"
+      destination:
+        namespace: kube-system
+        server: "{{server}}"
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: aws-load-balancer-controller
+  namespace: argocd
+spec:
+  generators:
+    - clusters: {}
+  template:
+    metadata:
+      name: "aws-lbc-{{name}}"
+      annotations:
+        argocd.argoproj.io/sync-wave: "-8"
+    spec:
+      ignoreDifferences:
+      - kind: Secret
+        name: aws-load-balancer-tls
+        jqPathExpressions:
+          - .data
+      - group: admissionregistration.k8s.io
+        kind: MutatingWebhookConfiguration
+        name: aws-load-balancer-webhook
+        jqPathExpressions:
+          - .webhooks[].clientConfig.caBundle
+      - group: admissionregistration.k8s.io
+        kind: ValidatingWebhookConfiguration
+        name: aws-load-balancer-webhook
+        jqPathExpressions:
+          - .webhooks[].clientConfig.caBundle
+      project: default
+      source:
+        chart: aws-load-balancer-controller
+        repoURL: https://aws.github.io/eks-charts
+        targetRevision: 1.13.3
+        helm:
+          parameters:
+            - name: clusterName
+              value: "{{name}}"
+            - name: serviceAccount.create
+              value: "false"
+            - name: serviceAccount.name
+              value: aws-load-balancer-controller
+      destination:
+        namespace: kube-system
+        server: "{{server}}"
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: false
+        syncOptions:
+          - CreateNamespace=true

@@ -1,0 +1,30 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: common
+  namespace: argocd
+spec:
+  generators:
+    - clusters: {}
+  template:
+    metadata:
+      name: "common-{{name}}"
+      annotations:
+        argocd.argoproj.io/sync-wave: "-1"
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/GrubzoFood/grubzo-k8s.git
+        targetRevision: release/1.0
+        path: charts/common
+        helm:
+          parameters:
+            - name: aws-secret-manager-region
+              value: ap-south-2
+      destination:
+        namespace: gateway
+        server: "{{server}}"
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true

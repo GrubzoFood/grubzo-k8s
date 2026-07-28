@@ -1,0 +1,4 @@
+tags:
+  external-secrets: true
+
+aws-secret-manager-region: ""

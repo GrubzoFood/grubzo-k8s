@@ -1,0 +1,104 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: envoy-gateway-crds
+  namespace: argocd
+spec:
+  generators:
+    - clusters: {}
+  template:
+    metadata:
+      name: "envoy-gateway-crds-{{name}}"
+      annotations:
+        argocd.argoproj.io/sync-wave: "-5"
+    spec:
+      project: default
+      source:
+        chart: gateway-crds-helm
+        repoURL: docker.io/envoyproxy
+        targetRevision: v1.5.9
+        helm:
+          parameters:
+            - name: crds.gatewayAPI.enabled
+              value: "true"
+            - name: crds.gatewayAPI.channel
+              value: standard
+            - name: crds.envoyGateway.enabled
+              value: "true"
+      destination:
+        namespace: gateway
+        server: "{{server}}"
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - ServerSideApply=true
+          - RespectIgnoreDifferences=true
+
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: envoy-gateway
+  namespace: argocd
+spec:
+  generators:
+    - clusters: {}
+  template:
+    metadata:
+      name: "envoy-gateway-{{name}}"
+      annotations:
+        argocd.argoproj.io/sync-wave: "-4"
+    spec:
+      project: default
+      source:
+        chart: gateway-helm
+        repoURL: docker.io/envoyproxy
+        targetRevision: v1.5.9
+        helm:
+          parameters:
+            - name: crds.enabled
+              value: "false"
+      destination:
+        namespace: gateway
+        server: "{{server}}"
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - ServerSideApply=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: envoy-gateway-class
+  namespace: argocd
+spec:
+  generators:
+    - clusters: {}
+  template:
+    metadata:
+      name: "envoy-gateway-class-{{name}}"
+      annotations:
+        argocd.argoproj.io/sync-wave: "-3"
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/GrubzoFood/grubzo-k8s.git
+        targetRevision: release/1.0
+        path: argocd/common/manifests
+        directory:
+          include: "envoy.gatewayclass.yaml"
+      destination:
+        namespace: kube-system
+        server: "{{server}}"
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
