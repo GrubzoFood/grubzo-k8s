@@ -1,0 +1,27 @@
+image:
+  tag: "v0.1.5"
+
+instance: mars
+
+configMap:
+  name: config
+  values:
+    OAUTH_GOOGLE_CALLBACK_URL: http://auth.qa.grubzo.food/auth/v1/oauth/login/google/callback
+    OAUTH_GITHUB_CALLBACK_URL: http://auth.qa.grubzo.food/auth/v1/oauth/login/github/callback
+
+    # Runtime
+    INSTANCE: mars
+    ENV: qa
+
+
+httpRoute:
+  name: backend-http-redirect
+  hostnames:
+    - "auth.qa.grubzo.food"
+    - "ins1.qa.grubzo.food"
+
+httpsRoute:
+  name: backend-https
+  hostnames:
+    - "auth.qa.grubzo.food"
+    - "ins1.qa.grubzo.food"

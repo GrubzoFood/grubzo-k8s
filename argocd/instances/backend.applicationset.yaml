@@ -13,17 +13,17 @@ spec:
   generators:
     - list:
         elements:
-          # - env: qa
-          #   instance: mars
-          #   namespace: ins1
-
-          # - env: qa
-          #   instance: mars
-          #   namespace: ins2
-
-          - env: prod
+          - env: qa
             instance: mars
-            namespace: common
+            namespace: ins1
+
+          - env: qa
+            instance: mars
+            namespace: ins2
+
+          # - env: prod
+          #   instance: venus
+          #   namespace: common
 
   template:
     metadata:
