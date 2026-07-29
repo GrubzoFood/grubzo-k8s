@@ -5,8 +5,10 @@ httpRoute:
   name: frontend-http-redirect
   hostnames:
     - "ins1.qa.grubzo.food"
+    - "mars.qa.grubzo.food"
 
 httpsRoute:
   name: frontend-httpsroute
   hostnames:
     - "ins1.qa.grubzo.food"
+    - "mars.qa.grubzo.food"

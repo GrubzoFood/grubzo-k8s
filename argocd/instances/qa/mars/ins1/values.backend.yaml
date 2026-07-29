@@ -19,9 +19,11 @@ httpRoute:
   hostnames:
     - "auth.qa.grubzo.food"
     - "ins1.qa.grubzo.food"
+    - "mars.qa.grubzo.food"
 
 httpsRoute:
   name: backend-https
   hostnames:
     - "auth.qa.grubzo.food"
     - "ins1.qa.grubzo.food"
+    - "mars.qa.grubzo.food"
