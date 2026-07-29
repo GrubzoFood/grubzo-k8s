@@ -1,14 +1,17 @@
 image:
-  tag: "v0.1.6"
-
+  tag: "1.0-b9662d9"
 httpRoute:
   name: frontend-http-redirect
   hostnames:
     - "ins1.qa.grubzo.food"
     - "mars.qa.grubzo.food"
-
 httpsRoute:
   name: frontend-httpsroute
   hostnames:
     - "ins1.qa.grubzo.food"
     - "mars.qa.grubzo.food"
+replicas: 2
+resources:
+  limits:
+    cpu: 250m
+    memory: 256Mi
