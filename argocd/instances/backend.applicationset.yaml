@@ -21,9 +21,9 @@ spec:
             instance: mars
             namespace: ins2
 
-          # - env: prod
-          #   instance: venus
-          #   namespace: common
+          - env: prod
+            instance: venus
+            namespace: common
 
   template:
     metadata:
