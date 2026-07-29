@@ -10,7 +10,7 @@ httpsRoute:
   hostnames:
     - "ins1.qa.grubzo.food"
     - "mars.qa.grubzo.food"
-replicas: 2
+replicas: 1
 resources:
   limits:
     cpu: 250m
